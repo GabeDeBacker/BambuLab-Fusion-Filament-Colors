@@ -2,10 +2,12 @@
 import adsk.core, adsk.fusion, json, os, traceback
 PALETTE_ID='BambuLabNativePaletteV10';CMD_ID='BambuLabNativeV10';handlers=[]
 
-# On Windows, the path comes with backslashes, so we need to replace them with forward slashes for the file URL.
-# Otherwise when Fusion is running on Windows, it fails to find the palette.
+# Convert the local filesystem path into a properly formatted file:// URL.
+# pathlib handles Windows backslashes and POSIX paths and URL-encodes special
+# characters (e.g. spaces), so Fusion can load the palette on all platforms.
 def make_file_url(path):
-    return "file:///" + path.replace("\\", "/")
+    from pathlib import Path
+    return Path(path).as_uri()
 
 def C(h,a=255):
     h=h.lstrip('#');return adsk.core.Color.create(int(h[:2],16),int(h[2:4],16),int(h[4:6],16),a)
