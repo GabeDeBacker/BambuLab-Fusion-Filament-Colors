@@ -2,6 +2,11 @@
 import adsk.core, adsk.fusion, json, os, traceback
 PALETTE_ID='BambuLabNativePaletteV10';CMD_ID='BambuLabNativeV10';handlers=[]
 
+# On Windows, the path comes with backslashes, so we need to replace them with forward slashes for the file URL.
+# Otherwise when Fusion is running on Windows, it fails to find the palette.
+def make_file_url(path):
+    return "file:///" + path.replace("\\", "/")
+
 def C(h,a=255):
     h=h.lstrip('#');return adsk.core.Color.create(int(h[:2],16),int(h[2:4],16),int(h[4:6],16),a)
 
@@ -391,7 +396,8 @@ class CH(adsk.core.CommandCreatedEventHandler):
         app=adsk.core.Application.get();ui=app.userInterface;p=ui.palettes.itemById(PALETTE_ID)
         if not p:
             path=os.path.join(os.path.dirname(os.path.realpath(__file__)),'palette.html')
-            p=ui.palettes.add(PALETTE_ID,'Bambu Lab Filaments',path,True,True,True,520,720,True)
+            palette_path=make_file_url(path)
+            p=ui.palettes.add(PALETTE_ID,'Bambu Lab Filaments',palette_path,True,True,True,520,720,True)
             p.dockingState=adsk.core.PaletteDockingStates.PaletteDockStateRight
             h=PH();p.incomingFromHTML.add(h);handlers.append(h)
             p.isVisible=True
